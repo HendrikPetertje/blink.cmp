@@ -10,7 +10,7 @@ local function request(context, client)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
     params.context = {
       triggerKind = context.trigger.kind == 'trigger_character' and CompletionTriggerKind.TriggerCharacter
-        or CompletionTriggerKind.Invoked,
+          or CompletionTriggerKind.Invoked,
     }
     if context.trigger.kind == 'trigger_character' then params.context.triggerCharacter = context.trigger.character end
 
@@ -88,7 +88,7 @@ function completion.get_completion_for_client(context, client, opts)
   -- If any are marked as incomplete, we must tell blink.cmp, but this will cause a fetch on every keystroke
   -- So we cache the responses and only re-request completions from isIncomplete = true clients
   local cache_entry = cache.get(context, client)
-  if cache_entry ~= nil then return async.task.identity(cache_entry) end
+  if cache_entry ~= nil and client.name ~= 'vtsls' then return async.task.identity(cache_entry) end
 
   return request(context, client):map(function(res)
     if res.err or res.result == nil then
