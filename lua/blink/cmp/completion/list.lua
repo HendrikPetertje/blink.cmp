@@ -96,8 +96,8 @@ function list.show(context, items_by_source)
 
   -- if the keyword changed, the list is no longer explicitly selected
   local bounds_equal = list.context ~= nil
-    and list.context.bounds.start_col == context.bounds.start_col
-    and list.context.bounds.length == context.bounds.length
+      and list.context.bounds.start_col == context.bounds.start_col
+      and list.context.bounds.length == context.bounds.length
   if not bounds_equal then list.is_explicitly_selected = false end
 
   local previous_selected_item = list.get_selected_item()
@@ -116,10 +116,10 @@ function list.show(context, items_by_source)
   local previous_item_idx = list.get_item_idx_in_list(previous_selected_item)
   if list.is_explicitly_selected and previous_item_idx ~= nil and previous_item_idx <= 10 then
     list.select(previous_item_idx, { auto_insert = false, undo_preview = false })
-  -- respect the context's initial selected item idx
+    -- respect the context's initial selected item idx
   elseif context.initial_selected_item_idx ~= nil then
     list.select(context.initial_selected_item_idx, { undo_preview = false, is_explicit_selection = true })
-  -- otherwise, use the default selection
+    -- otherwise, use the default selection
   else
     list.select(
       list.get_selection_mode(context).preselect and 1 or nil,
@@ -331,6 +331,17 @@ end
 function list.apply_preview(item)
   -- undo the previous preview if it exists
   list.undo_preview()
+
+  -- Skip applying preview when the suggestion is blacklisted from being previewed
+  local blacklist = list.config.selection.auto_insert_blacklist
+  if blacklist ~= nil and #blacklist > 0 then
+    for _, v in ipairs(blacklist) do
+      if v == item.client_name or v == item.source_name then
+        list.preview_undo = nil
+        return
+      end
+    end
+  end
 
   -- apply the new preview
   local undo_text_edit, undo_cursor = require('blink.cmp.completion.accept.preview')(item)
